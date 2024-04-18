@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .form-control, .btn {
+        margin-top: 10px;  /* Margem para respiração entre os elementos */
+    }
+    .btn-outline-secondary {
+        border: 1px solid #6c757d; /* Corrigindo possíveis inconsistências de borda */
+    }
+    @media (max-width: 768px) {
+        .form-control, .btn {
+            margin-top: 10px; /* Espaçamento adicional para dispositivos menores */
+        }
+    }
+</style>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Monitoramento de Parâmetros</h2>
+
+    <div class="mb-5 text-center">
+        <form method="get" action="" class="form-inline justify-content-center">
+            <div class="input-group">
+                <input type="date" class="form-control me-2" name="start_date" value="{{ request.GET.start_date }}">
+                <input type="date" class="form-control me-2" name="end_date" value="{{ request.GET.end_date }}">
+                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter"></i> Filtrar</button>
+                <a href="{% url 'visualizar_graficos' aquario_pk=aquario_pk %}" class="btn btn-outline-secondary"><i class="fas fa-eraser"></i> Limpar Filtros</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-6 text-center">
+            <h4>pH ao Longo do Tempo</h4>
+            <canvas id="phChart"></canvas>
+        </div>
+        <div class="col-sm-12 col-md-6 text-center">
+            <h4>Temperatura ao Longo do Tempo</h4>
+            <canvas id="tempChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <a href="{% url 'manutencao_list' aquario_pk=aquario_pk %}" class="btn btn-secondary mt-2"><i class="fas fa-arrow-left"></i> Voltar</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ctxPh = document.getElementById('phChart').getContext('2d');
+        var phChart = new Chart(ctxPh, {
+            type: 'line',
+            data: {
+                labels: {{ datas|safe }},
+                datasets: [{
+                    label: 'pH',
+                    data: {{ phs|safe }},
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        align: 'top',
+                        color: '#444',
+                        formatter: function(value, context) {
+                            return value.toFixed(1);
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 5,
+                        max: 8,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 0.1
+                        }
+                    }
+                }
+            }
+        });
+
+        var ctxTemp = document.getElementById('tempChart').getContext('2d');
+        var tempChart = new Chart(ctxTemp, {
+            type: 'line',
+            data: {
+                labels: {{ datas|safe }},
+                datasets: [{
+                    label: 'Temperatura (°C)',
+                    data: {{ temperaturas|safe }},
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        align: 'top',
+                        color: '#444',
+                        formatter: function(value, context) {
+                            return value + '°C';
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 20,
+                        max: 45,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

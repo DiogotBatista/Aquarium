@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        @media (max-width: 768px) {
+            .form-control, .btn {
+                margin-top: 10px;
+            }
+        }
+
+    </style>
+
+    <div class="container mt-3">
+        <h2>Manutenções do Aquário: {{ aquario.nome }}</h2>
+
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+        <div class="mt-4 mb-3"> <!-- Adiciona uma margem inferior -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manutencaoModal"><i
+                    class="fas fa-plus"></i>
+                Adicionar Manutenção
+            </button>
+            <a href="{% url 'visualizar_graficos' aquario.pk %}" class="btn btn-outline-success"><i
+                    class="fas fa-chart-line"></i> Ver Gráficos</a>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="manutencaoModal" tabindex="-1" aria-labelledby="manutencaoModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'manutencao_create' aquario.pk %}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="manutencaoModalLabel"> Nova
+                                Manutenção</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                                    class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar Manutenção
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Filtro por Datas -->
+
+        <div class="mb-3 text-center">
+            <form method="get" action="" class="form-inline justify-content-center">
+                <div class="input-group">
+                    <input type="date" class="form-control me-2" name="data_inicio">
+                    <input type="date" class="form-control me-2" name="data_fim">
+                    <!-- Espaço adicionado após data_fim -->
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> Filtrar</button>
+                    <!-- Espaço adicionado após o botão Filtrar -->
+                    <a href="{% url 'manutencao_list' aquario_pk=aquario.pk %}" class="btn btn-outline-secondary"><i class="fas fa-eraser"></i> Limpar Filtros</a>
+                </div>
+            </form>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table mt-3">
+                <thead>
+                <tr>
+                    <th class="text-center">Data</th>
+                    <th class="text-center">Tipo de Manutenção</th>
+                    <th class="text-center">pH</th>
+                    <th class="text-center">Tem. (C°)</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for manutencao in manutencoes %}
+                    <tr>
+                        <td class="text-center">{{ manutencao.data }}</td>
+                        <td class="text-center">{{ manutencao.tipo_manutencao.tipo_manutencao }}</td>
+                        <td class="text-center">{{ manutencao.ph }}</td>
+                        <td class="text-center">{{ manutencao.temperatura }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'manutencao_edit' aquario.pk manutencao.pk %}"
+                               class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteManutencaoModal"
+                                    data-bs-url="{% url 'manutencao_delete' aquario.pk manutencao.pk %}"><i
+                                    class="fas fa-trash-alt"></i>
+                            </button>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma manutenção registrada para esse aquário.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if manutencoes.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ manutencoes.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in manutencoes.paginator.page_range %}
+                    {% if manutencoes.number == num %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if manutencoes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ manutencoes.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ manutencoes.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <!-- Modal de Confirmação de Exclusão (fora do loop for) -->
+        <div class="modal fade" id="confirmDeleteManutencaoModal" tabindex="-1"
+             aria-labelledby="confirmDeleteManutencaoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteManutencaoModalLabel">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja excluir esta manutenção?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form id="deleteManutencaoForm" method="post" action="">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger" value="Excluir">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'aquario_detail' aquario.pk %}" class="btn btn-secondary mt-2"><i
+                class="fas fa-arrow-left"></i> Voltar aos detalhes do
+            Aquário</a>
+
+    </div>
+
+    <script>
+        var deleteManutencaoModal = document.getElementById('confirmDeleteManutencaoModal')
+        deleteManutencaoModal.addEventListener('show.bs.modal', function (event) {
+            // Botão que acionou o modal
+            var button = event.relatedTarget
+            // Extrair a URL do atributo data-bs-url do botão
+            var deleteUrl = button.getAttribute('data-bs-url')
+            // Atualizar o atributo action do formulário dentro do modal
+            var form = document.getElementById('deleteManutencaoForm')
+            form.action = deleteUrl
+        })
+    </script>
+{% endblock %}
+
+
+

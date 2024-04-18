@@ -1,0 +1,15 @@
+<!-- especime_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirmação de Exclusão</h2>
+    <p>Tem certeza de que deseja excluir o espécime "{{ especime.nome_popular }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'especime_detail' especime.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

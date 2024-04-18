@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Meus Aquários</h2>
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <a href="{% url 'aquario_create' %}" class="btn btn-success mb-3">
+        <i class="fas fa-plus-circle"></i> Adicionar Novo Aquário
+    </a>
+
+    {% if aquarios %}
+        <div class="row mt-3">
+            {% for aquario in aquarios %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ aquario.nome }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ aquario.tipo.tipo_aquario }}</h6>
+                        <p class="card-text">Volume: {{ aquario.volume }} Litros</p>
+                        <a href="{% url 'aquario_detail' aquario.id %}" class="btn btn-primary">
+                            <i class="fas fa-info-circle"></i> Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Você não tem nenhum Aquário cadastrado.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

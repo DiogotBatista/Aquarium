@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h1 class="display-4">Bem-vindo ao Sistema de Gerenciamento de Aquários</h1>
+        <p class="lead">Gerencie seus aquários de forma eficiente.</p>
+
+        {% if not user.is_authenticated %}
+            <div class="btn-group mt-3" role="group" aria-label="Ações Principais">
+            <a href="{% url 'login' %}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Logar
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Cadastrar
+            </a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="/aquarium_bd" class="btn btn-warning">
+                <i class="fas fa-database"></i> Adm BD
+            </a>
+        {% endif %}
+        {% if user.is_superuser or is_in_equipe %}
+            <a href="{% url 'especime_list' %}" class="btn btn-info">
+                <i class="fas fa-fish"></i> Lista de Espécimes
+            </a>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'aquario_list' %}" class="btn btn-primary">
+                <i class="fas fa-water"></i> Lista de Aquários
+            </a>
+        {% endif %}
+        </div>
+
+        <div class="container mt-5">
+            {% if avisos %}
+                <div class="alert alert-info mt-4" role="alert">
+                    <h4 class="alert-heading">Avisos Importantes!</h4>
+                    {% for aviso in avisos %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ aviso.titulo }}</h5>
+                                <p class="card-text">{{ aviso.mensagem }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% include 'footer.html' %}
+{% endblock %}

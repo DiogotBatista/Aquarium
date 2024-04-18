@@ -1,0 +1,46 @@
+{% block content %}
+<style>
+    .footer {
+        background-color: #f8f9fa; /* Suave cor de fundo */
+        border-top: 1px solid #eaeaea; /* Borda sutil na parte superior */
+    }
+    .footer h5 {
+        color: #333; /* Cor mais escura para títulos para melhor contraste */
+    }
+    .footer a {
+        color: #007bff; /* Cor de link padrão do Bootstrap para melhor visibilidade */
+        text-decoration: none; /* Remove o sublinhado */
+    }
+    .footer a:hover {
+        text-decoration: underline; /* Sublinhado ao passar o mouse para indicar clicabilidade */
+    }
+    .footer .text-muted {
+        color: #6c757d; /* Mantém a cor padrão para texto mudo do Bootstrap */
+    }
+</style>
+<footer class="footer bg-light mt-auto py-3 border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <h5>Contato</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a href="mailto:contato@dbsistemas.com.br">contato@dbsistemas.com.br</a></li>
+                </ul>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <h5>Site</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a href="https://dbsistemas.com.br/">dbsistemas.com.br</a></li>
+                </ul>
+            </div>
+            <div class="col-md-12 col-lg-4 mb-3">
+                <h5>Sobre</h5>
+                <p>Desenvolvido por DB Sistemas Full Stack. Transformamos ideias em soluções digitais inovadoras.</p>
+            </div>
+        </div>
+        <div class="text-center">
+            <span class="text-muted">© 2024 DB Sistemas Full Stack</span>
+        </div>
+    </div>
+</footer>
+{% endblock %}

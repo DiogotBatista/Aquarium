@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Detalhes do Aquário: {{ aquario.nome }}</h2>
+                <p><strong>Tipo:</strong> {{ aquario.tipo.tipo_aquario }}</p>
+                <p><strong>Volume:</strong> {{ aquario.volume }} litros</p>
+                <p><strong>Data de Montagem:</strong> {{ aquario.data_montagem|date:"d/m/Y" }}</p>
+                <p><strong>Observações:</strong> {{ aquario.observacao }}</p>
+                {% if aquario.foto %}
+                    <div class="text-center my-3">
+                        <img src="{{ aquario.foto.url }}" alt="Foto do Aquário {{ aquario.nome }}" class="img-fluid">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editAquarioModal">
+                <i class="fas fa-edit"></i> Editar
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                    data-bs-target="#deleteConfirmationModal">
+                <i class="fas fa-trash-alt"></i> Excluir
+            </button>
+            <a href="{% url 'populacao_list' aquario.pk %}" class="btn btn-info">
+                <i class="fas fa-fish"></i> População
+            </a>
+            <a href="{% url 'manutencao_list' aquario.pk %}" class="btn btn-warning">
+                <i class="fas fa-tools"></i> Manutenções
+            </a>
+            <a href="{% url 'notas_list' aquario.pk %}" class="btn btn-warning">
+                <i class="fas fa-sticky-note"></i> Notas
+            </a>
+            <a href="{% url 'aquario_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+
+        <!-- Modal de Edição -->
+        <div class="modal fade" id="editAquarioModal" tabindex="-1" aria-labelledby="editAquarioModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editAquarioModalLabel">Editar Aquário</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" enctype="multipart/form-data" action="{% url 'aquario_update' aquario.id %}">
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar Alterações
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmação de Exclusão -->
+        <div class="modal fade" id="deleteConfirmationModal" tabindex="-1"
+             aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja excluir o aquário "{{ aquario.nome }}"?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" action="{% url 'aquario_delete' aquario.id %}">
+                            {% csrf_token %}
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Excluir
+                                </button>
+                        </form>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

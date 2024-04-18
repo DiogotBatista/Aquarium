@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        @media (max-width: 768px) {
+            .form-control, .btn {
+                margin-top: 10px;
+            }
+        }
+
+    </style>
+
+    <div class="container mt-3">
+        <h2>Notas do Aquário: {{ aquario.nome }}</h2>
+
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+        <div class="mt-4 mb-3"> <!-- Adiciona uma margem inferior -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#notasModal"><i
+                    class="fas fa-plus"></i>
+                Adicionar Notas
+            </button>
+
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="notasModal" tabindex="-1" aria-labelledby="notasModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'notas_create' aquario.pk %}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="notasModalLabel">Nova Nota</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Salvar Nota</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Filtro por Datas -->
+
+        <div class="mb-3 text-center">
+            <form method="get" action="" class="form-inline justify-content-center">
+                <div class="input-group">
+                    <input type="date" class="form-control me-2" name="data_inicio">
+                    <input type="date" class="form-control me-2" name="data_fim">
+                    <!-- Espaço adicionado após data_fim -->
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter"></i> Filtrar</button>
+                    <!-- Espaço adicionado após o botão Filtrar -->
+                    <a href="{% url 'notas_list' aquario_pk=aquario.pk %}" class="btn btn-outline-secondary"><i class="fas fa-eraser"></i> Limpar
+                        Filtros</a>
+                </div>
+            </form>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table mt-3">
+                <thead>
+                <tr>
+                    <th class="text-center">Data</th>
+                    <th class="text-center">Título</th>
+                    <th class="text-center">Texto</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for nota in notas %}
+                    <tr>
+                        <td class="text-center">{{ nota.data }}</td>
+                        <td class="text-center">{{ nota.titulo }}</td>
+                        <td class="text-center">{{ nota.texto }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'notas_edit' aquario.pk nota.pk %}"
+                               class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteNotasModal"
+                                    data-bs-url="{% url 'notas_delete' aquario.pk nota.pk %}"><i class="fas fa-trash-alt"></i>
+                            </button>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma nota registrada para esse aquário.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if notas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notas.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in notas.paginator.page_range %}
+                    {% if notas.number == num %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if notas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notas.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notas.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <!-- Modal de Confirmação de Exclusão (fora do loop for) -->
+        <div class="modal fade" id="confirmDeleteNotasModal" tabindex="-1"
+             aria-labelledby="confirmDeleteNotasModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteNotasModalLabel">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja excluir esta nota?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form id="deleteNotasForm" method="post" action="">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger" value="Excluir">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'aquario_detail' aquario.pk %}" class="btn btn-secondary mt-2"><i class="fas fa-arrow-left"></i> Voltar aos detalhes do
+            Aquário</a>
+
+    </div>
+
+    <script>
+        var deleteNotasModal = document.getElementById('confirmDeleteNotasModal')
+        deleteNotasModal.addEventListener('show.bs.modal', function (event) {
+            // Botão que acionou o modal
+            var button = event.relatedTarget
+            // Extrair a URL do atributo data-bs-url do botão
+            var deleteUrl = button.getAttribute('data-bs-url')
+            // Atualizar o atributo action do formulário dentro do modal
+            var form = document.getElementById('deleteNotasForm')
+            form.action = deleteUrl
+        })
+    </script>
+{% endblock %}
+
+
+

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+    .container {
+        margin-top: 4rem;
+    }
+    .detail-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 0.25rem;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .btn-custom {
+        margin-top: 10px;
+    }
+    img.img-fluid {
+        max-width: 100%; /* Adaptação para telas menores */
+        height: auto;
+        margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .container, .detail-card {
+            padding: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if especime %}
+    <div class="detail-card">
+        <h2>Detalhes do Espécime: {{ especime.nome_popular }}</h2>
+        <div><strong>Tipo do Espécime:</strong> {{ especime.tipo_especime }}</div>
+        <div><strong>Nome Científico:</strong> {{ especime.nome_cientifico }}</div>
+        <div><strong>Observação:</strong> {{ especime.observacao }}</div>
+        {% if especime.imagem %}
+        <div>
+            <strong>Imagem:</strong><br>
+            <img src="{{ especime.imagem.url }}" alt="Imagem do Espécime" class="img-fluid">
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        Detalhes do espécime não encontrados.
+    </div>
+    {% endif %}
+
+    <a href="{% url 'especime_list' %}" class="btn btn-secondary btn-custom"><i class="fas fa-arrow-left"></i> Voltar</a>
+    {% if is_superuser or usuario_no_grupo_equipe %}
+        <a href="{% url 'especime_edit' especime.pk %}" class="btn btn-primary btn-custom"><i class="fas fa-edit"></i> Editar</a>
+    {% endif %}
+</div>
+{% endblock %}

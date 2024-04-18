@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        /* Estilos existentes */
+        .card-container, .custom-card, .card-body, .card-img-top {
+            /* Suas regras existentes */
+        }
+
+        /* Adicionando estilos responsivos para os botões */
+        @media (max-width: 768px) {
+            .btn-group .btn {
+                font-size: 14px; /* Ajusta o tamanho da fonte para telas menores */
+                padding: 8px 10px; /* Ajusta o padding dos botões */
+                margin-bottom: 5px; /* Espaçamento entre os botões */
+            }
+
+            .btn-group {
+                display: flex;
+                flex-wrap: wrap; /* Permite a quebra de linha dos botões */
+                justify-content: center; /* Centraliza os botões quando eles quebram a linha */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-group .btn {
+                font-size: 12px; /* Tamanho da fonte para dispositivos muito pequenos */
+                padding: 6px 8px; /* Menor padding */
+            }
+
+            .input-group, .form-control {
+                font-size: 12px; /* Ajusta o tamanho da fonte da barra de pesquisa */
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h2>População do Aquário: {{ aquario.nome }}</h2>
+
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+
+        <!-- Botão para abrir o modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPopulacaoModal"><i
+                class="fas fa-plus"></i>
+            Adicionar Nova População
+        </button>
+
+        <!-- Início do Formulário de Pesquisa -->
+        <div class="mt-3 mb-3">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" class="form-control me-2" placeholder="Pesquisar por nome popular" name="q"
+                           value="{{ query }}">
+                    <button class="btn btn-outline-secondary me-2" type="submit"><i class="fas fa-search"></i> Pesquisar
+                    </button>
+                    <a href="{% url 'populacao_list' aquario.pk %}" class="btn btn-outline-danger"><i class="fas fa-eraser"></i> Limpar</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Botões de Tipo de Espécime para Filtro Rápido -->
+        <div class="btn-group mb-3">
+            {% for tipo in tipo_especime_list %}
+                {% if tipo.id|stringformat:"s" in tipo_especime_ids %}
+                    <a href="{% url 'populacao_list' aquario.pk %}?
+
+                            
+                            {% for id in tipo_especime_ids %}{% if id != tipo.id|stringformat:"s" %}tipo_especime={{ id }}&{% endif %}{% endfor %}q={{ query }}"
+                       class="btn btn-primary">{{ tipo.tipo_especime }}</a>
+                {% else %}
+                    <a href="{% url 'populacao_list' aquario.pk %}?{% for id in tipo_especime_ids %}tipo_especime={{ id }}&{% endfor %}tipo_especime={{ tipo.id }}&q={{ query }}"
+                       class="btn btn-outline-primary me-1">{{ tipo.tipo_especime }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Fim do Formulário de Pesquisa -->
+        <!-- Modal -->
+        <div class="modal fade" id="addPopulacaoModal" tabindex="-1" aria-labelledby="addPopulacaoModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPopulacaoModalLabel">Nova População</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'populacao_create' aquario.pk %}">
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                                    class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        {% if populacao %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Especime</th>
+                        <th class="text-center">Tipo</th>
+                        <th class="text-center">Quantidade</th>
+                        <th class="text-center">Observações</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in populacao %}
+                        <tr>
+                            <td>{{ item.especime.nome_popular }}</td>
+                            <td class="text-center">{{ item.especime.tipo_especime.tipo_especime }}</td>
+                            <td class="text-center">{{ item.quantidade }}</td>
+                            <td>{{ item.observacao }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'populacao_edit' aquario.pk item.pk %}"
+                                   class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
+
+                                <!-- Botão Ver Espécie -->
+                                <a href="{% url 'especime_detail' item.especime.pk %}?from=populacao_list"
+                                   class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+
+                                <!-- Botão que aciona o modal -->
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#deletePopulacaoModal-{{ item.pk }}"><i
+                                        class="fas fa-trash-alt"></i>
+                                </button>
+
+                                <!-- Modal de exclusão para cada item -->
+                                <div class="modal fade" id="deletePopulacaoModal-{{ item.pk }}" tabindex="-1"
+                                     aria-labelledby="deletePopulacaoModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deletePopulacaoModalLabel">Confirmar
+                                                    Exclusão</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Tem certeza que deseja excluir a população de
+                                                "{{ item.especime.nome_popular }}"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    <i class="fas fa-times"></i>
+                                                    Cancelar
+                                                </button>
+                                                <form method="post"
+                                                      action="{% url 'populacao_delete' aquario.pk item.pk %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger"><i
+                                                            class="fas fa-trash-alt"></i> Excluir
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhuma população registrada para esse aquário.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mb-3">População total: {{ soma_peixes }}</div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Nenhuma população registrada para este aquário.
+            </div>
+        {% endif %}
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if populacao.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page=1{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}"
+                           aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=
+
+                                
+                                {{ populacao.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}"
+                           aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in populacao.paginator.page_range %}
+                    {% if populacao.number == num %}
+                        <li class="page-item active"><a class="page-link" href="?page=
+
+                                
+                                {{ num }}{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}">{{ num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page=
+
+                                
+                                {{ num }}{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if populacao.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=
+
+                                
+                                {{ populacao.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}"
+                           aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=
+
+                                
+                                {{ populacao.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% for id in tipo_especime_ids %}&tipo_especime={{ id }}{% endfor %}"
+                           aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+
+        <a href="{% url 'aquario_detail' aquario.pk %}" class="btn btn-secondary mt-2"> <i
+                class="fas fa-arrow-left"></i> Voltar aos detalhes do
+            Aquário</a>
+    </div>
+{% endblock %}

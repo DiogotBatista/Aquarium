@@ -57,8 +57,8 @@
         Detalhes do espécime não encontrados.
     </div>
     {% endif %}
+    <button onclick="history.back()" class="btn btn-secondary btn-custom"><i class="fas fa-arrow-left"></i> Voltar</button>
 
-    <a href="{% url 'especime_list' %}" class="btn btn-secondary btn-custom"><i class="fas fa-arrow-left"></i> Voltar</a>
     {% if is_superuser or usuario_no_grupo_equipe %}
         <a href="{% url 'especime_edit' especime.pk %}" class="btn btn-primary btn-custom"><i class="fas fa-edit"></i> Editar</a>
     {% endif %}
